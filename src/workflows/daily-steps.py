@@ -1,20 +1,30 @@
 from datetime import date, timedelta
 
+import os
+
 from dotenv import load_dotenv
 
 from src.helpers import get_garmin_client, get_notion_client
 
+
+load_dotenv()
 
 def get_all_daily_steps(garmin):
     """
     Get last x days of daily step count data from Garmin Connect.
     """
     startdate = date.today() - timedelta(days=1)
-    daterange = [startdate + timedelta(days=x)
-                 for x in range((date.today() - startdate).days)]  # excl. today
+    print("startdate ---> ", startdate)
+    daterange = [
+        startdate + timedelta(days=x)
+        for x in range((date.today() - startdate).days)
+    ]  # excl. today
+    print("daterange ---> ", daterange)
     daily_steps = []
+
     for d in daterange:
         daily_steps += garmin.get_daily_steps(d.isoformat(), d.isoformat())
+        print("daily_steps ---> ", daily_steps)
     return daily_steps
 
 
@@ -76,7 +86,11 @@ def create_daily_steps(client, database_id, steps):
     """
     Create a new daily steps entry in the Notion database.
     """
+    print("client ---> ", client)
+    print("database_id ---> ", database_id)
+    print("steps ---> ", steps)
     total_distance = steps.get('totalDistance')
+    print("total_distance ---> ", total_distance)
     if total_distance is None:
         total_distance = 0
     properties = {
@@ -96,8 +110,6 @@ def create_daily_steps(client, database_id, steps):
 
 
 def main():
-    load_dotenv()
-
     # Initialize Garmin and Notion clients using environment variables
     garmin_client, _ = get_garmin_client()
     notion_client, notion_dbs = get_notion_client()
